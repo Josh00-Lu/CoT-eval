@@ -1,0 +1,7 @@
+wget -c "https://cloud.tsinghua.edu.cn/seafhttp/files/3fb0a842-131a-4fa0-99f5-140c37489a19/pytorch_model-00001-of-00007.bin"
+wget -c "https://cloud.tsinghua.edu.cn/seafhttp/files/6938e770-be69-407f-880e-2a6feffcfaf0/pytorch_model-00002-of-00007.bin"
+wget -c "https://cloud.tsinghua.edu.cn/seafhttp/files/af47f104-a776-44a6-96a9-e22fe4c8d7e8/pytorch_model-00003-of-00007.bin"
+wget -c "https://cloud.tsinghua.edu.cn/seafhttp/files/6e73f012-c047-4e6f-9f68-617f9c6d91ce/pytorch_model-00004-of-00007.bin"
+wget -c "https://cloud.tsinghua.edu.cn/seafhttp/files/6f16b5de-c69a-48ab-beb8-22cd76e93508/pytorch_model-00005-of-00007.bin"
+wget -c "https://cloud.tsinghua.edu.cn/seafhttp/files/f5714760-4184-4f29-8349-3b6df5b02089/pytorch_model-00006-of-00007.bin"
+wget -c "https://cloud.tsinghua.edu.cn/seafhttp/files/42e27c68-c44a-4581-8a28-62ed40cc2bd6/pytorch_model-00007-of-00007.bin"
