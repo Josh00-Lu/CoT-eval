@@ -1,1 +1,2 @@
 *.jsonl
+!grade-school-math/**
