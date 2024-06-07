@@ -30,3 +30,6 @@ The above command will generate `history.jsonl` and `none.jsonl`, respectively.
 python eval.py --path <e.g. history.jsonl>
 python eval.py --path <e.g. none.jsonl>
 ```
+
+## Support Dataset
+- [x]  GSM8K
