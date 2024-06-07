@@ -1,5 +1,11 @@
 ## Simple Script for LLM Math Evaluation
 
+### Install
+```
+conda activate -n chatglm python=3.9
+pip install -r requirements.txt
+```
+
 ### Configuration Path
 In `CoT.py`:
 ```python
@@ -7,14 +13,6 @@ In `CoT.py`:
 tokenizer = AutoTokenizer.from_pretrained("./chatglm2-6b", trust_remote_code=True)
 model = AutoModel.from_pretrained("./chatglm2-6b", trust_remote_code=True).half().cuda()
 model = model.eval()
-######### Modifiy Here #########
-......
-######### Modifiy Here #########
-def query_model(prompt, history):
-    """Simulates querying a model. Replace this function with actual model querying logic."""
-    # Assuming the model returns an answer, this is a placeholder function.
-    response, history = model.chat(tokenizer, prompt, history=history)
-    return response
 ######### Modifiy Here #########
 ```
 

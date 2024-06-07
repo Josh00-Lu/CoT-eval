@@ -1,3 +1,4 @@
+import torch
 import json
 import re
 from tqdm import tqdm
@@ -42,69 +43,53 @@ def generate_cot_prompt(base_prompt, new_question):
     """Generates a Chain of Thought prompt by appending a new question to the base prompt."""
     return f"{base_prompt}\nquestion: {new_question}, answer: "
 
-######### Modifiy Here #########
-def query_model(prompt, history):
-    """Simulates querying a model. Replace this function with actual model querying logic."""
-    # Assuming the model returns an answer, this is a placeholder function.
-    response, history = model.chat(tokenizer, prompt, history=history)
-    return response
-######### Modifiy Here #########
+def get_dataloader(file_path, batch_size=8):
+    dataset = read_jsonl(file_path)
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size)
+    return dataloader
 
-def main(cot_type):
-    # cot_type = "history_label"
-    # cot_type = "one_string"
+def build_prompt(question, cot_type):
+    if cot_type == "history":
+        prompt = tokenizer.build_prompt(question, CoT_history)
+    elif cot_type == "history_label":
+        prompt = tokenizer.build_prompt(question, CoT_history_label)
+    elif cot_type == "one_string":
+        prompt = generate_cot_prompt(CoT_string, question)
+        prompt = tokenizer.build_prompt(prompt, [])
+    elif cot_type == "none":
+        prompt = tokenizer.build_prompt(question, [])
+    else:
+        raise NotImplementedError
     
-    # File path to your test.jsonl file
+    return prompt
+
+def main(args):
     file_path = './grade-school-math/grade_school_math/data/test.jsonl'
-    
-    # Base CoT prompt as described
-    base_prompt = CoT_string
-
-    # Read questions from the jsonl file
-    questions_and_answers = read_jsonl(file_path)
-    
+    dataloader = get_dataloader(file_path=file_path, batch_size=args.batch_size)
     output_data = []
     
-    # Process each question
-    for idx, question_and_answer in enumerate(tqdm(questions_and_answers)):
+    for batch in tqdm(dataloader):
+        questions = batch["question"]
+        ground_truths = batch['answer']
+        pure_ground_truth = [re.search(r'#### (-?\d+)', ground_truth).group(1) for ground_truth in ground_truths]
+        queries = [build_prompt(question, args.cot_type) for question in questions]
         
-        question = question_and_answer['question']
-        ground_truth = question_and_answer['answer']
-        pure_ground_truth = re.search(r'#### (-?\d+)', ground_truth).group(1)
+        inputs = tokenizer(queries, padding=True, return_tensors="pt", truncation=True, max_length=2048).to('cuda')
+        outputs = model.generate(**inputs, do_sample=False, max_new_tokens=512)
         
-        if cot_type == "history":
-            prompt = question
-            response = query_model(prompt, CoT_history)
-        elif cot_type == "history_label":
-            prompt = question
-            response = query_model(prompt, CoT_history_label)
-        elif cot_type == "one_string":
-            prompt = generate_cot_prompt(base_prompt, question)
-            response = query_model(prompt, [])
-        elif cot_type == "none":
-            prompt = question
-            response = query_model(prompt, [])
-        else:
-            raise NotImplementedError
-
-        output_data.append({
-            "pure_ground_truth": pure_ground_truth,
-            "model_out": response
-        })
-        
-        # Print the model's response
-        # print(f"---Model Input({idx})---")
-        # print(prompt)
-        # print(f"---Model Outpu({idx})---")
-        # print(response)
-        
-    write_jsonl(output_data, f"./{cot_type}.jsonl")
+        for idx in range(len(outputs)):
+            output = outputs.tolist()[idx][len(inputs["input_ids"][idx]):]
+            response = tokenizer.decode(output)
+            output_data.append({
+                "pure_ground_truth": pure_ground_truth[idx],
+                "model_out": response
+            })
+            
+    write_jsonl(output_data, f"./{args.cot_type}.jsonl")
 
 if __name__ == "__main__":
-    
     parser = argparse.ArgumentParser()
     parser.add_argument('--cot_type', type=str, default="history")
-    
+    parser.add_argument('--batch_size', type=int, default=16)
     args = parser.parse_args()
-    
-    main(args.cot_type)
+    main(args)
