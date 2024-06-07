@@ -6,9 +6,11 @@ from transformers import AutoTokenizer, AutoModel
 
 import argparse
 
+######### Modifiy Here #########
 tokenizer = AutoTokenizer.from_pretrained("./chatglm2-6b", trust_remote_code=True)
 model = AutoModel.from_pretrained("./chatglm2-6b", trust_remote_code=True).half().cuda()
 model = model.eval()
+######### Modifiy Here #########
 
 CoT_list = [
     {"question": "There are 15 trees in the grove. Grove workers will plant trees in the grove today. After they are done, there will be 21 trees. How many trees did the grove workers plant today?", "answer": "There are 15 trees originally. Then there were 21 trees after some more were planted. So there must have been 21 - 15 = 6. The answer is 6."},
@@ -40,11 +42,13 @@ def generate_cot_prompt(base_prompt, new_question):
     """Generates a Chain of Thought prompt by appending a new question to the base prompt."""
     return f"{base_prompt}\nquestion: {new_question}, answer: "
 
+######### Modifiy Here #########
 def query_model(prompt, history):
     """Simulates querying a model. Replace this function with actual model querying logic."""
     # Assuming the model returns an answer, this is a placeholder function.
     response, history = model.chat(tokenizer, prompt, history=history)
     return response
+######### Modifiy Here #########
 
 def main(cot_type):
     # cot_type = "history_label"
