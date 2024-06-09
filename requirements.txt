@@ -7,3 +7,7 @@ mdtex2html
 sentencepiece
 accelerate
 ipykernel
+rouge_chinese
+nltk
+jieba
+datasets
