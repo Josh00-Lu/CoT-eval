@@ -15,7 +15,7 @@ parser.add_argument('--ft_path', type=str)
 args = parser.parse_args()
 
 FT_PATH = args.ft_path
-BASE_PATH = "/home/zhanggl/lyx/apex/workspace_chatglm/chatglm2-6b"
+BASE_PATH = "./chatglm2-6b"
 os.system(f"cp {BASE_PATH}/configuration_chatglm.py {FT_PATH}/configuration_chatglm.py")
 os.system(f"cp {BASE_PATH}/modeling_chatglm.py {FT_PATH}/modeling_chatglm.py")
 os.system(f"cp {BASE_PATH}/quantization.py {FT_PATH}/quantization.py")

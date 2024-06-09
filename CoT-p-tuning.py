@@ -8,9 +8,13 @@ from transformers import AutoConfig, AutoModel, AutoTokenizer
 import argparse
 import os
 
-CHECKPOINT_PATH = "/data/josh00/Desktop/workspace_chatglm/chatglm2-6b/ChatGLM2-6B/ptuning/output/adgen-chatglm2-6b-pt-128-2e-2/checkpoint-2000"
+parser = argparse.ArgumentParser()
+parser.add_argument('--cot_type', type=str, default="history")
+parser.add_argument('--batch_size', type=int, default=16)
+parser.add_argument('--path', type=str)
+args = parser.parse_args()
 
-path_parts = CHECKPOINT_PATH.split("/")
+path_parts = args.path.split("/")
 specific_parts = path_parts[-2:]  # This selects the last two components of the path
 specific_parts[0] = "-".join(specific_parts[0].split("-")[-2:])
 exp = "-".join(specific_parts)
@@ -19,7 +23,7 @@ exp = "-".join(specific_parts)
 tokenizer = AutoTokenizer.from_pretrained("./chatglm2-6b", trust_remote_code=True)
 config = AutoConfig.from_pretrained("./chatglm2-6b", trust_remote_code=True, pre_seq_len=128)
 model = AutoModel.from_pretrained("./chatglm2-6b", config=config, trust_remote_code=True)
-prefix_state_dict = torch.load(os.path.join(CHECKPOINT_PATH, "pytorch_model.bin"))
+prefix_state_dict = torch.load(os.path.join(args.path, "pytorch_model.bin"))
 new_prefix_state_dict = {}
 for k, v in prefix_state_dict.items():
     if k.startswith("transformer.prefix_encoder."):
@@ -56,7 +60,7 @@ def write_jsonl(data_list, file_path):
 
 def generate_cot_prompt(base_prompt, new_question):
     """Generates a Chain of Thought prompt by appending a new question to the base prompt."""
-    return f"{base_prompt}\nquestion: {new_question}, answer: "
+    return f"{base_prompt}\nquestion: {new_question}\nanswer: "
 
 def get_dataloader(file_path, batch_size=8):
     dataset = read_jsonl(file_path)
@@ -78,7 +82,7 @@ def build_prompt(question, cot_type):
     
     return prompt
 
-def main(args):
+def main():
     file_path = './grade-school-math/grade_school_math/data/test.jsonl'
     dataloader = get_dataloader(file_path=file_path, batch_size=args.batch_size)
     output_data = []
@@ -100,10 +104,6 @@ def main(args):
             })
             
     write_jsonl(output_data, f"./{exp}-{args.cot_type}.jsonl")
-
+    
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--cot_type', type=str, default="history")
-    parser.add_argument('--batch_size', type=int, default=16)
-    args = parser.parse_args()
-    main(args)
+    main()
