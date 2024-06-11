@@ -2,7 +2,8 @@
 
 ### Install
 ```
-conda activate -n chatglm python=3.9
+conda create -n chatglm python=3.9
+conda activate chatglm
 pip install -r requirements.txt
 ```
 
